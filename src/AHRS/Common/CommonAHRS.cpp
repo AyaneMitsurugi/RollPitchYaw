@@ -7,7 +7,7 @@
 
 /* EXTERNAL VARIABLES */
 // Common
-float sample_freq     = RS2_TIMESTAMP_DOMAIN_GLOBAL_TIME;
+float sample_freq     = 1;
 float inv_sample_freq = (1.0f / sample_freq); // Inverse of sample frequency [s]
 
 float roll            = 0.0f;

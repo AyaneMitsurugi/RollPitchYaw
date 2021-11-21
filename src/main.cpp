@@ -9,22 +9,32 @@ std::ofstream infile;
 // Output file with Roll-Pitch-Yaw comparison
 std::ofstream outfile;
 
-// Gyroscope - angular velocity [rad/s]
+// Gyroscope [m/s]
 float gx = 0.0;
 float gy = 0.0;
 float gz = 0.0;
 
-// Accelerometer - angular acceleration [rad/s^2]
+// Accelerometer [m/s^2]
 float ax = 0.0;
 float ay = 0.0;
 float az = 0.0;
 
-// Gyroscope - angular velocity for Fusion Algorithm [deg/s]
+// Gyroscope [rad/s]
+float gx_rad = 0.0;
+float gy_rad = 0.0;
+float gz_rad = 0.0;
+
+// Accelerometer [rad/s^2]
+float ax_rad = 0.0;
+float ay_rad = 0.0;
+float az_rad = 0.0;
+
+// Gyroscope for Fusion Algorithm [deg/s]
 float fusion_gx = 0.0;
 float fusion_gy = 0.0;
 float fusion_gz = 0.0;
 
-// Accelerometer - angular acceleration for Fusion Algorithm [g]
+// Accelerometer for Fusion Algorithm [g]
 float fusion_ax = 0.0;
 float fusion_ay = 0.0;
 float fusion_az = 0.0;
@@ -89,7 +99,7 @@ float yaw_mah_rad   = 0.0;
 /* Get data from the input file */
 /* gx, gy, gz - gyroscope's raw data; ax, ay, az - accelerometer's raw data; *_imu - Euler angles calculated by the IMU */
 void getDataFromInputFile(void) {
-    infile >> gx >> gy >> gz >> ax >> ay >> az >> roll_imu >> pitch_imu >> yaw_imu;
+    infile << gx << gy << gz << ax << ay << az << roll_imu << pitch_imu << yaw_imu;
 }
 
 /* Save headers in the output file */
@@ -135,6 +145,22 @@ void saveIMUInOutputFile(float roll_imu, float pitch_imu, float yaw_imu) {
     }
 }
 
+/* Convert rad/s^2 to g */
+/* https://stackoverflow.com/questions/6291931/how-to-calculate-g-force-using-x-y-z-values-from-the-accelerometer-in-android/44421684 */
+void convertAccForFusion(float ax, float ay, float az) {
+    const float g = 9.81;
+
+    // Firstly, convert rad/s^2 to deg/s^2
+    fusion_ax = FusionRadiansToDegrees(ax);
+    fusion_ay = FusionRadiansToDegrees(ay);
+    fusion_az = FusionRadiansToDegrees(az);
+
+    // Secondly, divide by g = 9.81 to convert deg/s^2 to g
+    fusion_ax /= g;
+    fusion_ay /= g;
+    fusion_az /= g;
+}
+
 /* Normalize Roll-Pitch-Yaw calculated by Fusion Algoritm */
 void normalizeRollPitchYawFusion(float roll_rad, float pitch_rad, float yaw_rad) {
     roll_fus_rad  = fmod(roll_rad, (2*M_PI));
@@ -173,13 +199,13 @@ int main()
 
     // Initialize sample index
     int sample_idx = 1;
-    std::string buffer = "2016-02-11-17-35-23";
+    std::string file_name = "2016-02-11-17-35-23";
 
     // Get input file
-    std::fstream infile(buffer+"_gyro_acc_measurements.txt", std::ios_base::in);
+    std::fstream infile(file_name+"_gyro_acc_measurements.txt", std::ios_base::in);
 
     // Create output file with prefix of the input file
-    outfile.open (buffer);
+    outfile.open ("../output_data/"+file_name);
 
     getDataFromInputFile();
     saveHeadersInOutputFile();
@@ -270,12 +296,12 @@ int main()
 
         saveRollPitchYawMahonyInOutputFile(roll_mah_deg, pitch_mah_deg, yaw_mah_deg, roll_mah_rad, pitch_mah_rad, yaw_mah_rad);
 
-        std::cout << "Saving " << sample_idx << "th sample in the " << buffer << " file \r";
+        std::cout << "Saving " << sample_idx << "th sample in the " << file_name << " file \r";
 
         // Increase sample index
         sample_idx++;
     } // END OF: while (true)
     outfile.close();
     infile.close();
-    return;
+    return 0;
 } // END OF: main()

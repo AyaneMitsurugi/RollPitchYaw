@@ -47,6 +47,8 @@ stdint.h
 /home/ayane/Master_GitHub_RollPitchYaw/RollPitchYaw/src/AHRS/Common/CommonAHRS.hpp
 
 /home/ayane/Master_GitHub_RollPitchYaw/RollPitchYaw/src/AHRS/Mahony/MahonyAHRS.hpp
+cstdio
+-
 ../Common/CommonAHRS.hpp
 /home/ayane/Master_GitHub_RollPitchYaw/RollPitchYaw/src/AHRS/Common/CommonAHRS.hpp
 

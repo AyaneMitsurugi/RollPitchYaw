@@ -8,6 +8,7 @@
 #define TWO_KI (2.0f * 0.0f) // 2 * integral gain (Ki)
 
 /* INCLUDES */
+#include <cstdio>
 #include "../Common/CommonAHRS.hpp"
 
 /* EXTERNAL VARIABLES */
