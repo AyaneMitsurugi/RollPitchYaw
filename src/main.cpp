@@ -4,30 +4,30 @@
 /* VARIABLES */
 
 // Input file with IMU-related data
-std::ofstream infile;
+std::fstream infile;
 
 // Output file with Roll-Pitch-Yaw comparison
 std::ofstream outfile;
 
-// Gyroscope [m/s]
+// Gyroscope [rad/s]
 float gx = 0.0;
 float gy = 0.0;
 float gz = 0.0;
 
-// Accelerometer [m/s^2]
+// Accelerometer [rad/s^2]
 float ax = 0.0;
 float ay = 0.0;
 float az = 0.0;
 
-// Gyroscope [rad/s]
-float gx_rad = 0.0;
-float gy_rad = 0.0;
-float gz_rad = 0.0;
+// Gyroscope [m/s]
+float gx_m = 0.0;
+float gy_m = 0.0;
+float gz_m = 0.0;
 
-// Accelerometer [rad/s^2]
-float ax_rad = 0.0;
-float ay_rad = 0.0;
-float az_rad = 0.0;
+// Accelerometer [m/s^2]
+float ax_m = 0.0;
+float ay_m = 0.0;
+float az_m = 0.0;
 
 // Gyroscope for Fusion Algorithm [deg/s]
 float fusion_gx = 0.0;
@@ -45,9 +45,13 @@ float my = 0.0;
 float mz = 0.0;
 
 // Roll-Pitch-Yaw calculated by IMU
-float roll_imu  = 0.0;
-float pitch_imu = 0.0;
-float yaw_imu   = 0.0;
+float roll_imu_deg  = 0.0;
+float pitch_imu_deg = 0.0;
+float yaw_imu_deg   = 0.0;
+
+float roll_imu_rad  = 0.0;
+float pitch_imu_rad = 0.0;
+float yaw_imu_rad   = 0.0;
 
 // Common
 float precision   = 6.0;
@@ -100,7 +104,24 @@ float yaw_mah_rad   = 0.0;
 /* Get data from the input file */
 /* gx, gy, gz - gyroscope's raw data; ax, ay, az - accelerometer's raw data; *_imu - Euler angles calculated by the IMU */
 void getDataFromInputFile(void) {
-    infile << sample_time << gx << gy << gz << ax << ay << az << roll_imu << pitch_imu << yaw_imu;
+    std::fstream infile("../input_data/2016-02-11-17-35-23_gyro_acc_measurements", std::ios_base::in);
+    std::string sample_time;
+    std::string gx_m;
+    std::string gy_m;
+    std::string gz_m;
+    std::string ax_m;
+    std::string ay_m;
+    std::string az_m;
+    std::string roll_imu_deg;
+    std::string pitch_imu_deg;
+    std::string yaw_imu_deg;
+
+    // std::cout << "Infile: " << infile << std::endl;
+    // getline(infile, line);
+    // std::cout << "Line: " << line << std::endl;
+    while (infile >> sample_time >> gx_m >> gy_m >> gz_m >> ax_m >> ay_m >> az_m >> roll_imu_deg >> pitch_imu_deg >> yaw_imu_deg) {
+        std::cout << sample_time << "" << gx_m << " " << gy_m << " " << gz_m << " " << ax_m << " " << ay_m << " " << az_m << " " << roll_imu_deg << " "<< pitch_imu_deg << " " << yaw_imu_deg << std::endl;
+    }
 }
 
 /* Save headers in the output file */
@@ -123,26 +144,27 @@ void saveHeadersInOutputFile(void) {
 }
 
 /* Save sample_time, gyroscope's raw measurements and converted to rad/s in the output file */
-void saveGyroInOutputFile(float sample_time, float gx, float gy, float gz, float gx_rad, float gy_rad, float gz_rad) {
+void saveGyroInOutputFile(float sample_time, float gx_m, float gy_m, float gz_m, float gx, float gy, float gz) {
     if (outfile.is_open()) {
         outfile << std::setprecision(precision) << std::fixed << sample_time << ",";
-        outfile << std::setprecision(precision) << std::fixed << gz     << "," << gy     << "," << gz     << ",";
-        outfile << std::setprecision(precision) << std::fixed << gx_rad << "," << gy_rad << "," << gz_rad << ",";
+        outfile << std::setprecision(precision) << std::fixed << gx_m << "," << gy_m << "," << gz_m << ",";
+        outfile << std::setprecision(precision) << std::fixed << gx   << "," << gy   << "," << gz   << ",";
     }
 }
 
 /* Save acceleromenter's raw measurements and converted to rad/s^2 in the output file */
-void saveAccInOutputFile(float ax, float ay, float az, float ax_rad, float ay_rad, float az_rad) {
+void saveAccInOutputFile(float ax_m, float ay_m, float az_m, float ax, float ay, float az) {
     if (outfile.is_open()) {
-        outfile << std::setprecision(precision) << std::fixed << ax     << "," << ay     << "," << az     << ",";
-        outfile << std::setprecision(precision) << std::fixed << ax_rad << "," << ay_rad << "," << az_rad << ",";
+        outfile << std::setprecision(precision) << std::fixed << ax_m << "," << ay_m << "," << az_m << ",";
+        outfile << std::setprecision(precision) << std::fixed << ax   << "," << ay   << "," << az   << ",";
     }
 }
 
-/* Save IMU's raw Roll-Pitch-Yaw in the output file */
-void saveIMUInOutputFile(float roll_imu, float pitch_imu, float yaw_imu) {
+/* Save IMU's Roll-Pitch-Yaw in the output file */
+void saveIMUInOutputFile(float roll_imu_deg, float pitch_imu_deg, float yaw_imu_deg, float roll_imu_rad, float pitch_imu_rad, float yaw_imu_rad) {
     if (outfile.is_open()) {
-        outfile << std::setprecision(precision) << std::fixed << roll_imu << "," << pitch_imu << "," << yaw_imu << ",";
+        outfile << std::setprecision(precision) << std::fixed << roll_imu_deg << "," << pitch_imu_deg << "," << yaw_imu_deg << ",";
+        outfile << std::setprecision(precision) << std::fixed << roll_imu_rad << "," << pitch_imu_rad << "," << yaw_imu_rad << ",";
     }
 }
 
@@ -200,17 +222,32 @@ int main()
     int row = 1;
     std::string file_name = "2016-02-11-17-35-23";
 
-    // Get input file
-    std::fstream infile(file_name+"_gyro_acc_measurements.txt", std::ios_base::in);
-
     // Create output file with prefix of the input file
-    outfile.open ("../output_data/"+file_name);
+    outfile.open("../output_data/"+file_name);
 
     getDataFromInputFile();
     saveHeadersInOutputFile();
-    saveGyroInOutputFile(sample_time, gx, gy, gz, gx_rad, gy_rad, gz_rad);
-    saveAccInOutputFile(ax, ay, az, ax_rad, ay_rad, az_rad);
-    saveIMUInOutputFile(roll_imu, pitch_imu, yaw_imu);
+
+    /* Convert [m/s] -> [rad/s] */
+    gx = FusionDegreesToRadians(gx_m);
+    gy = FusionDegreesToRadians(gy_m);
+    gz = FusionDegreesToRadians(gz_m);
+
+    saveGyroInOutputFile(sample_time, gx_m, gy_m, gz_m, gx, gy, gz);
+
+    /* Convert [m/s^s] -> [rad/s^s] */
+    ax = FusionDegreesToRadians(ax_m);
+    ay = FusionDegreesToRadians(ay_m);
+    az = FusionDegreesToRadians(az_m);
+    
+    saveAccInOutputFile(ax_m, ay_m, az_m, ax, ay, az);
+
+    /* Convert degrees --> rad */
+    roll_imu_rad  = FusionDegreesToRadians(roll_imu_deg);
+    pitch_imu_rad = FusionDegreesToRadians(pitch_imu_deg);
+    yaw_imu_rad   = FusionDegreesToRadians(yaw_imu_deg);
+
+    saveIMUInOutputFile(roll_imu_deg, pitch_imu_deg, yaw_imu_deg, roll_imu_rad, pitch_imu_rad, yaw_imu_rad);
 
     /* AHRS FUSION-RELATED FUNCTIONS */
 
