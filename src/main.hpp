@@ -57,6 +57,7 @@ extern float yaw_imu;
 
 // Common
 extern float precision;
+extern float sample_time;
 
 extern float roll;
 extern float pitch;
@@ -105,8 +106,8 @@ void getDataFromInputFile(void);
 /* Save headers in the output file */
 void saveHeadersInOutputFile(void);
 
-/* Save sample index, gyroscope's raw measurements and converted to rad/s in the output file */
-void saveGyroInOutputFile(int sample_idx, float gx, float gy, float gz, float gx_rad, float gy_rad, float gz_rad);
+/* Save time, gyroscope's raw measurements and converted to rad/s in the output file */
+void saveGyroInOutputFile(float time, float gx, float gy, float gz, float gx_rad, float gy_rad, float gz_rad);
 
 /* Save acceleromenter's raw measurements and converted to rad/s^2 in the output file */
 void saveAccInOutputFile(float ax, float ay, float az, float ax_rad, float ay_rad, float az_rad);

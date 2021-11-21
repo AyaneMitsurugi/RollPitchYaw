@@ -50,7 +50,8 @@ float pitch_imu = 0.0;
 float yaw_imu   = 0.0;
 
 // Common
-float precision = 6.0;
+float precision   = 6.0;
+float sample_time = 0.0;
 
 /* AHRS Fusion-related variables */
 FusionBias fusionBias;
@@ -99,13 +100,13 @@ float yaw_mah_rad   = 0.0;
 /* Get data from the input file */
 /* gx, gy, gz - gyroscope's raw data; ax, ay, az - accelerometer's raw data; *_imu - Euler angles calculated by the IMU */
 void getDataFromInputFile(void) {
-    infile << gx << gy << gz << ax << ay << az << roll_imu << pitch_imu << yaw_imu;
+    infile << sample_time << gx << gy << gz << ax << ay << az << roll_imu << pitch_imu << yaw_imu;
 }
 
 /* Save headers in the output file */
 void saveHeadersInOutputFile(void) {
     if (outfile.is_open()) {
-        outfile << "Index,";
+        outfile << "Time [s],";
         outfile << "Angular velocity X [m/s], Angular velocity Y [m/s], Angular velocity Z [m/s],";                 // Gyroscope's raw data
         outfile << "Angular velocity X [rad/s], Angular velocity Y [rad/s], Angular velocity Z [rad/s],";
         outfile << "Angular acceleration X [rad/s^2],Angular acceleration Y [rad/s^2],Angular acceleration Z [rad/s^2],";
@@ -121,10 +122,10 @@ void saveHeadersInOutputFile(void) {
     }
 }
 
-/* Save sample index, gyroscope's raw measurements and converted to rad/s in the output file */
-void saveGyroInOutputFile(int sample_idx, float gx, float gy, float gz, float gx_rad, float gy_rad, float gz_rad) {
+/* Save sample_time, gyroscope's raw measurements and converted to rad/s in the output file */
+void saveGyroInOutputFile(float sample_time, float gx, float gy, float gz, float gx_rad, float gy_rad, float gz_rad) {
     if (outfile.is_open()) {
-        outfile << sample_idx << ",";
+        outfile << std::setprecision(precision) << std::fixed << sample_time << ",";
         outfile << std::setprecision(precision) << std::fixed << gz     << "," << gy     << "," << gz     << ",";
         outfile << std::setprecision(precision) << std::fixed << gx_rad << "," << gy_rad << "," << gz_rad << ",";
     }
@@ -196,9 +197,7 @@ void saveRollPitchYawMahonyInOutputFile (float roll_mah_deg, float pitch_mah_deg
 int main()
 {
     /* Variables */
-
-    // Initialize sample index
-    int sample_idx = 1;
+    int row = 1;
     std::string file_name = "2016-02-11-17-35-23";
 
     // Get input file
@@ -209,7 +208,7 @@ int main()
 
     getDataFromInputFile();
     saveHeadersInOutputFile();
-    saveGyroInOutputFile(sample_idx, gx, gy, gz, gx_rad, gy_rad, gz_rad);
+    saveGyroInOutputFile(sample_time, gx, gy, gz, gx_rad, gy_rad, gz_rad);
     saveAccInOutputFile(ax, ay, az, ax_rad, ay_rad, az_rad);
     saveIMUInOutputFile(roll_imu, pitch_imu, yaw_imu);
 
@@ -220,6 +219,8 @@ int main()
 
     // Initialise AHRS algorithm
     FusionAhrsInitialise(&fusionAhrs, 0.5f); // gain = 0.5
+
+    std::cout << "Saving output file takes some time. Please be patient..." << std::endl;
 
     /* MAIN LOOP */
     while (true)
@@ -296,11 +297,11 @@ int main()
 
         saveRollPitchYawMahonyInOutputFile(roll_mah_deg, pitch_mah_deg, yaw_mah_deg, roll_mah_rad, pitch_mah_rad, yaw_mah_rad);
 
-        std::cout << "Saving " << sample_idx << "th sample in the " << file_name << " file \r";
+        std::cout << "Saving " << row << "th row in the " << file_name << " file \r";
 
-        // Increase sample index
-        sample_idx++;
+        row++;
     } // END OF: while (true)
+    std::cout << "Saving output file is COMPLETE!" << std::endl;
     outfile.close();
     infile.close();
     return 0;
