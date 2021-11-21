@@ -1,0 +1,18 @@
+# License: Apache 2.0. See LICENSE file in root directory.
+# Copyright(c) 2019 Intel Corporation. All Rights Reserved.
+cmake_minimum_required(VERSION 3.1.0)
+
+project(RollPitchYaw)
+
+# Enable C++11
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+
+# Add the application sources to the target
+add_executable(${PROJECT_NAME}
+		src/main.cpp
+		src/AHRS/Fusion/FusionAhrs.c
+		src/AHRS/Fusion/FusionBias.c
+        src/AHRS/Madgwick/MadgwickAHRS.cpp
+        src/AHRS/Mahony/MahonyAHRS.cpp
+		src/AHRS/Common/CommonAHRS.cpp)
