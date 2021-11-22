@@ -20,9 +20,9 @@ float ay = 0.0;
 float az = 0.0;
 
 // Gyroscope [m/s]
-float gx_m = 0.0;
-float gy_m = 0.0;
-float gz_m = 0.0;
+float gx_m[] = {0.0};
+float gy_m[] = {0.0};
+float gz_m[] = {0.0};
 
 // Accelerometer [m/s^2]
 float ax_m = 0.0;
@@ -104,23 +104,13 @@ float yaw_mah_rad   = 0.0;
 /* Get data from the input file */
 /* gx, gy, gz - gyroscope's raw data; ax, ay, az - accelerometer's raw data; *_imu - Euler angles calculated by the IMU */
 void getDataFromInputFile(void) {
-    std::fstream infile("../input_data/2016-02-11-17-35-23_gyro_acc_measurements", std::ios_base::in);
-    std::string sample_time;
-    std::string gx_m;
-    std::string gy_m;
-    std::string gz_m;
-    std::string ax_m;
-    std::string ay_m;
-    std::string az_m;
-    std::string roll_imu_deg;
-    std::string pitch_imu_deg;
-    std::string yaw_imu_deg;
-
-    // std::cout << "Infile: " << infile << std::endl;
-    // getline(infile, line);
-    // std::cout << "Line: " << line << std::endl;
-    while (infile >> sample_time >> gx_m >> gy_m >> gz_m >> ax_m >> ay_m >> az_m >> roll_imu_deg >> pitch_imu_deg >> yaw_imu_deg) {
-        std::cout << sample_time << "" << gx_m << " " << gy_m << " " << gz_m << " " << ax_m << " " << ay_m << " " << az_m << " " << roll_imu_deg << " "<< pitch_imu_deg << " " << yaw_imu_deg << std::endl;
+    std::fstream infile("../input_data/2016-02-11-17-35-23_gyro_acc_measurements.txt", std::ios_base::in);
+    float sample_time_f;
+    float gx_m_f;
+    float gy_m_f;
+    float gz_m_f;
+    while (infile >> sample_time >> gx_m_f >> gy_m_f >> gz_m_f >> ax_m >> ay_m >> az_m >> roll_imu_deg >> pitch_imu_deg >> yaw_imu_deg) {
+        std::cout << sample_time << "" << gx_m[sample_time] << " " << gy_m[sample_time] << " " << gz_m[sample_time] << " " << ax_m << " " << ay_m << " " << az_m << " " << roll_imu_deg << " "<< pitch_imu_deg << " " << yaw_imu_deg << std::endl;
     }
 }
 

@@ -26,9 +26,9 @@ extern float ay;
 extern float az;
 
 // Gyroscope [m/s]
-extern float gx_m;
-extern float gy_m;
-extern float gz_m;
+extern float gx_m[];
+extern float gy_m[];
+extern float gz_m[];
 
 // Accelerometer [m/s^2]
 extern float ax_m;
