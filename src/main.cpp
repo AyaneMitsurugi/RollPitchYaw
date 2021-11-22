@@ -20,9 +20,9 @@ float ay = 0.0;
 float az = 0.0;
 
 // Gyroscope [m/s]
-float gx_m[] = {0.0};
-float gy_m[] = {0.0};
-float gz_m[] = {0.0};
+float gx_m = 0.0;
+float gy_m = 0.0;
+float gz_m = 0.0;
 
 // Accelerometer [m/s^2]
 float ax_m = 0.0;
@@ -54,8 +54,9 @@ float pitch_imu_rad = 0.0;
 float yaw_imu_rad   = 0.0;
 
 // Common
-float precision   = 6.0;
-float sample_time = 0.0;
+float debug_print_en = 0.0;
+float precision      = 6.0;
+float sample_time    = 0.0;
 
 /* AHRS Fusion-related variables */
 FusionBias fusionBias;
@@ -101,27 +102,14 @@ float yaw_mah_rad   = 0.0;
 
 /* FUNCTIONS */
 
-/* Get data from the input file */
-/* gx, gy, gz - gyroscope's raw data; ax, ay, az - accelerometer's raw data; *_imu - Euler angles calculated by the IMU */
-void getDataFromInputFile(void) {
-    std::fstream infile("../input_data/2016-02-11-17-35-23_gyro_acc_measurements.txt", std::ios_base::in);
-    float sample_time_f;
-    float gx_m_f;
-    float gy_m_f;
-    float gz_m_f;
-    while (infile >> sample_time >> gx_m_f >> gy_m_f >> gz_m_f >> ax_m >> ay_m >> az_m >> roll_imu_deg >> pitch_imu_deg >> yaw_imu_deg) {
-        std::cout << sample_time << "" << gx_m[sample_time] << " " << gy_m[sample_time] << " " << gz_m[sample_time] << " " << ax_m << " " << ay_m << " " << az_m << " " << roll_imu_deg << " "<< pitch_imu_deg << " " << yaw_imu_deg << std::endl;
-    }
-}
-
 /* Save headers in the output file */
 void saveHeadersInOutputFile(void) {
     if (outfile.is_open()) {
         outfile << "Time [s],";
         outfile << "Angular velocity X [m/s], Angular velocity Y [m/s], Angular velocity Z [m/s],";                 // Gyroscope's raw data
         outfile << "Angular velocity X [rad/s], Angular velocity Y [rad/s], Angular velocity Z [rad/s],";
-        outfile << "Angular acceleration X [rad/s^2],Angular acceleration Y [rad/s^2],Angular acceleration Z [rad/s^2],";
         outfile << "Angular acceleration X [m/s^2],Angular acceleration Y [m/s^2],Angular acceleration Z [m/s^2],"; // Accelerometer's raw data
+        outfile << "Angular acceleration X [rad/s^2],Angular acceleration Y [rad/s^2],Angular acceleration Z [rad/s^2],";
         outfile << "IMU Roll [degrees], IMU Pitch [degrees],IMU Yaw [degrees],";
         outfile << "IMU Roll [rad], IMU Pitch [rad],IMU Yaw [rad],";
         outfile << "Fusion Roll [degrees], Fusion Pitch [degrees],Fusion Yaw [degrees],";
@@ -209,38 +197,15 @@ void saveRollPitchYawMahonyInOutputFile (float roll_mah_deg, float pitch_mah_deg
 int main()
 {
     /* Variables */
-    int row = 1;
-    std::string file_name = "2016-02-11-17-35-23";
+    std::string  file_name = "2016-02-11-17-45-07";
+    std::fstream infile("../input_data/"+file_name+"_gyro_acc_measurements.txt", std::ios_base::in);
 
-    // Create output file with prefix of the input file
+    // Create output file with the same prefix as an input file
     outfile.open("../output_data/"+file_name);
 
-    getDataFromInputFile();
     saveHeadersInOutputFile();
 
-    /* Convert [m/s] -> [rad/s] */
-    gx = FusionDegreesToRadians(gx_m);
-    gy = FusionDegreesToRadians(gy_m);
-    gz = FusionDegreesToRadians(gz_m);
-
-    saveGyroInOutputFile(sample_time, gx_m, gy_m, gz_m, gx, gy, gz);
-
-    /* Convert [m/s^s] -> [rad/s^s] */
-    ax = FusionDegreesToRadians(ax_m);
-    ay = FusionDegreesToRadians(ay_m);
-    az = FusionDegreesToRadians(az_m);
-    
-    saveAccInOutputFile(ax_m, ay_m, az_m, ax, ay, az);
-
-    /* Convert degrees --> rad */
-    roll_imu_rad  = FusionDegreesToRadians(roll_imu_deg);
-    pitch_imu_rad = FusionDegreesToRadians(pitch_imu_deg);
-    yaw_imu_rad   = FusionDegreesToRadians(yaw_imu_deg);
-
-    saveIMUInOutputFile(roll_imu_deg, pitch_imu_deg, yaw_imu_deg, roll_imu_rad, pitch_imu_rad, yaw_imu_rad);
-
     /* AHRS FUSION-RELATED FUNCTIONS */
-
     // Initialise gyroscope bias correction algorithm
     FusionBiasInitialise(&fusionBias, 0.5f, sample_freq); // stationary threshold = 0.5 degrees per second
 
@@ -250,9 +215,47 @@ int main()
     std::cout << "Saving output file takes some time. Please be patient..." << std::endl;
 
     /* MAIN LOOP */
-    while (true)
-    {
+    while (infile >> sample_time >> gx_m >> gy_m >> gz_m >> ax_m >> ay_m >> az_m >> roll_imu_deg >> pitch_imu_deg >> yaw_imu_deg) {
+        if (debug_print_en == 1) {
+            std::cout << "\tINPUT FILE:" << std::endl;
+            std::cout << "sample time = " << sample_time << " gx_m = " << gx_m << " gy_m = " << gy_m << " gz_m = " << gz_m << std::endl;
+            std::cout << "ax_m = "<< ax_m << " ay_m = " << ay_m << " az_m = " << az_m << std::endl;
+            std::cout << "roll_imu_deg = " << roll_imu_deg << " pitch_imu_deg = "<< pitch_imu_deg << " yaw_imu_deg = " << yaw_imu_deg << std::endl;
+        }
+
+        /* GYROSCOP{E */
+        // Convert [m/s] -> [rad/s]
+        gx = FusionDegreesToRadians(gx_m);
+        gy = FusionDegreesToRadians(gy_m);
+        gz = FusionDegreesToRadians(gz_m);
+
+        saveGyroInOutputFile(sample_time, gx_m, gy_m, gz_m, gx, gy, gz);
+
+        /* ACCELEROMETER */
+        // Convert [m/s^s] -> [rad/s^s]
+        ax = FusionDegreesToRadians(ax_m);
+        ay = FusionDegreesToRadians(ay_m);
+        az = FusionDegreesToRadians(az_m);
+    
+        saveAccInOutputFile(ax_m, ay_m, az_m, ax, ay, az);
+
+        /* ROLL-PITCH-YAW CALCULATED BY IMU */
+        // Convert [degrees] -> [rad]
+        roll_imu_rad  = FusionDegreesToRadians(roll_imu_deg);
+        pitch_imu_rad = FusionDegreesToRadians(pitch_imu_deg);
+        yaw_imu_rad   = FusionDegreesToRadians(yaw_imu_deg);
+
+        saveIMUInOutputFile(roll_imu_deg, pitch_imu_deg, yaw_imu_deg, roll_imu_rad, pitch_imu_rad, yaw_imu_rad);
+
+        if (debug_print_en == 1) {
+            std::cout << "\tINPUT FILE AFTER unit conversion (m -> rad and deg -> rad):" << std::endl;
+            std::cout << " gx = " << gx << " gy = " << gy << " gz = " << gz << std::endl;
+            std::cout << "ax = "<< ax << " ay = " << ay << " az = " << az << std::endl;
+            std::cout << "roll_imu_rad = " << roll_imu_rad << " pitch_imu_rad = "<< pitch_imu_rad << " yaw_imu_rad = " << yaw_imu_rad << std::endl;
+        }
+
         /* AHRS FUSION-RELATED FUNCTIONS */
+        // Convert [rad/s] -> [deg/s]
         fusion_gx  = FusionRadiansToDegrees(gx); // [deg/s]
         fusion_gy  = FusionRadiansToDegrees(gy); // [deg/s]
         fusion_gz  = FusionRadiansToDegrees(gz); // [deg/s]
@@ -265,7 +268,7 @@ int main()
         };
         FusionVector3 calibratedGyroscope = FusionCalibrationInertial(uncalibratedGyroscope, FUSION_ROTATION_MATRIX_IDENTITY, gyroscopeSensitivity, FUSION_VECTOR3_ZERO);
 
-        // Accelometer - convert rad/s^2 to deg/s^2 and then to g
+        // Convert [rad/s^2] to [deg/s^2] and then to [g]
         convertAccForFusion(ax, ay, az); // [g]
 
 	    // Calibrate accelerometer
@@ -282,6 +285,7 @@ int main()
         // Update AHRS algorithm
         FusionAhrsUpdateWithoutMagnetometer(&fusionAhrs, calibratedGyroscope, calibratedAccelerometer, sample_freq);
 
+        // Roll-Pitch-Yaw calculated by Fusion Algorithm
         FusionEulerAngles eulerAngles = FusionQuaternionToEulerAngles(FusionAhrsGetQuaternion(&fusionAhrs));
 
         roll_fus_rad  = eulerAngles.angle.roll;  // [rad]
@@ -290,43 +294,62 @@ int main()
 
         normalizeRollPitchYawFusion(roll_fus_rad, pitch_fus_rad, yaw_fus_rad);
 
+        // Convert [rad] -> [degrees]
         roll_fus_deg  = FusionRadiansToDegrees(roll_fus_rad);  // [degrees]
         pitch_fus_deg = FusionRadiansToDegrees(pitch_fus_rad); // [degrees]
         yaw_fus_deg   = FusionRadiansToDegrees(yaw_fus_rad);   // [degrees]
 
         saveRollPitchYawFusionInOutputFile (roll_fus_deg, pitch_fus_deg, yaw_fus_deg, roll_fus_rad, pitch_fus_rad,  yaw_fus_rad);
 
+        if (debug_print_en == 1) {
+            std::cout << "\tFusion Algorithm:" << std::endl;
+            std::cout << "roll_fus_deg = " << roll_fus_deg << " pitch_fus_deg = " << pitch_fus_deg << " yaw_fus_deg = " << yaw_fus_deg << std::endl;
+            std::cout << "roll_fus_rad = " << roll_fus_rad << " pitch_fus_rad = " << pitch_fus_rad << " yaw_fus_rad = " << yaw_fus_rad << std::endl;
+        }
+
         /* AHRS MADGWICK-RELATED FUNCTIONS */
         MadgwickGyroscopeAccelerometer(gx, gy, gz, ax, ay, az);
         computeAngles();
 
+        // Roll-Pitch-Yaw calculated by Madgwick Algorithm
         roll_mad_rad  = roll;  // [rad]
 	    pitch_mad_rad = pitch; // [rad]
 	    yaw_mad_rad   = yaw;   // [rad]
 
+        // Convert [rad] -> [degrees]
         roll_mad_deg  = FusionRadiansToDegrees(roll_mad_rad);  // [degrees]
         pitch_mad_deg = FusionRadiansToDegrees(pitch_mad_rad); // [degrees]
         yaw_mad_deg   = FusionRadiansToDegrees(yaw_mad_rad);   // [degrees]
 
         saveRollPitchYawMadgwickInOutputFile (roll_mad_deg, pitch_mad_deg, yaw_mad_deg, roll_mad_rad, pitch_mad_rad, yaw_mad_rad);
 
+        if (debug_print_en == 1) {
+            std::cout << "\tMadgwick Algorithm:" << std::endl;
+            std::cout << "roll_mad_deg = " << roll_mad_deg << " pitch_mad_deg = " << pitch_mad_deg << " yaw_mad_deg = " << yaw_mad_deg << std::endl;
+            std::cout << "roll_mad_rad = " << roll_mad_rad << " pitch_mad_rad = " << pitch_mad_rad << " yaw_mad_rad = " << yaw_mad_rad << std::endl;
+        }
+
         /* AHRS MAHONY-RELATED FUNCTIONS */
         MahonyGyroscopeAccelerometer(gx, gy, gz, ax, ay, az);
         computeAngles();
 
+        // Roll-Pitch-Yaw calculated by Mahony Algorithm
         roll_mah_rad  = roll;  // [rad]
 	    pitch_mah_rad = pitch; // [rad]
 	    yaw_mah_rad   = yaw;   // [rad]
 
+        // Convert [rad] -> [degrees]
         roll_mah_deg  = FusionRadiansToDegrees(roll_mah_rad);  // [degrees]
         pitch_mah_deg = FusionRadiansToDegrees(pitch_mah_rad); // [degrees]
         yaw_mah_deg   = FusionRadiansToDegrees(yaw_mah_rad);   // [degrees]
 
         saveRollPitchYawMahonyInOutputFile(roll_mah_deg, pitch_mah_deg, yaw_mah_deg, roll_mah_rad, pitch_mah_rad, yaw_mah_rad);
 
-        std::cout << "Saving " << row << "th row in the " << file_name << " file \r";
-
-        row++;
+        if (debug_print_en == 1) {
+            std::cout << "\tMahony Algorithm:" << std::endl;
+            std::cout << "roll_mah_deg = " << roll_mah_deg << " pitch_mah_deg = " << pitch_mah_deg << " yaw_mah_deg = " << yaw_mah_deg << std::endl;
+            std::cout << "roll_mah_rad = " << roll_mah_rad << " pitch_mah_rad = " << pitch_mah_rad << " yaw_mah_rad = " << yaw_mah_rad << std::endl;
+        }
     } // END OF: while (true)
     std::cout << "Saving output file is COMPLETE!" << std::endl;
     outfile.close();

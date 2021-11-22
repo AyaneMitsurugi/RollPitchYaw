@@ -26,9 +26,9 @@ extern float ay;
 extern float az;
 
 // Gyroscope [m/s]
-extern float gx_m[];
-extern float gy_m[];
-extern float gz_m[];
+extern float gx_m;
+extern float gy_m;
+extern float gz_m;
 
 // Accelerometer [m/s^2]
 extern float ax_m;
@@ -60,6 +60,7 @@ extern float pitch_imu_rad;
 extern float yaw_imu_rad;
 
 // Common
+extern float debug_print_en;
 extern float precision;
 extern float sample_time;
 
@@ -102,10 +103,6 @@ extern float pitch_mah_rad;
 extern float yaw_mah_rad;
 
 /* FUNCTIONS */
-
-/* Get data from the input file */
-/* gx, gy, gz - gyroscope's raw data; ax, ay, az - accelerometer's raw data; *_imu - Euler angles calculated by the IMU */
-void getDataFromInputFile(void);
 
 /* Save headers in the output file */
 void saveHeadersInOutputFile(void);
