@@ -146,20 +146,15 @@ void saveIMUInOutputFile(float roll_imu_deg, float pitch_imu_deg, float yaw_imu_
     }
 }
 
-/* Convert rad/s^2 to g */
+/* Convert m/s^2 to g */
 /* https://stackoverflow.com/questions/6291931/how-to-calculate-g-force-using-x-y-z-values-from-the-accelerometer-in-android/44421684 */
-void convertAccForFusion(float ax, float ay, float az) {
+void convertAccForFusion(float ax_m, float ay_m, float az_m) {
     const float g = 9.81;
 
-    // Firstly, convert rad/s^2 to deg/s^2
-    fusion_ax = FusionRadiansToDegrees(ax);
-    fusion_ay = FusionRadiansToDegrees(ay);
-    fusion_az = FusionRadiansToDegrees(az);
-
-    // Secondly, divide by g = 9.81 to convert deg/s^2 to g
-    fusion_ax /= g;
-    fusion_ay /= g;
-    fusion_az /= g;
+    // Divide accelerometer's measurement by g = 9.81 to convert m/s^2 to g
+    fusion_ax = ax_m / g;
+    fusion_ay = ay_m / g;
+    fusion_az = az_m / g;
 }
 
 /* Normalize Roll-Pitch-Yaw calculated by Fusion Algoritm */
@@ -215,50 +210,49 @@ int main()
     std::cout << "Saving output file takes some time. Please be patient..." << std::endl;
 
     /* MAIN LOOP */
-    while (infile >> sample_time >> gx_m >> gy_m >> gz_m >> ax_m >> ay_m >> az_m >> roll_imu_deg >> pitch_imu_deg >> yaw_imu_deg) {
+    while (infile >> sample_time >> gx >> gy >> gz >> ax >> ay >> az >> roll_imu_rad >> pitch_imu_rad >> yaw_imu_rad) {
         if (debug_print_en == 1) {
             std::cout << "\tINPUT FILE:" << std::endl;
-            std::cout << "sample time = " << sample_time << " gx_m = " << gx_m << " gy_m = " << gy_m << " gz_m = " << gz_m << std::endl;
-            std::cout << "ax_m = "<< ax_m << " ay_m = " << ay_m << " az_m = " << az_m << std::endl;
-            std::cout << "roll_imu_deg = " << roll_imu_deg << " pitch_imu_deg = "<< pitch_imu_deg << " yaw_imu_deg = " << yaw_imu_deg << std::endl;
-        }
-
-        /* GYROSCOP{E */
-        // Convert [m/s] -> [rad/s]
-        gx = FusionDegreesToRadians(gx_m);
-        gy = FusionDegreesToRadians(gy_m);
-        gz = FusionDegreesToRadians(gz_m);
-
-        saveGyroInOutputFile(sample_time, gx_m, gy_m, gz_m, gx, gy, gz);
-
-        /* ACCELEROMETER */
-        // Convert [m/s^s] -> [rad/s^s]
-        ax = FusionDegreesToRadians(ax_m);
-        ay = FusionDegreesToRadians(ay_m);
-        az = FusionDegreesToRadians(az_m);
-    
-        saveAccInOutputFile(ax_m, ay_m, az_m, ax, ay, az);
-
-        /* ROLL-PITCH-YAW CALCULATED BY IMU */
-        // Convert [degrees] -> [rad]
-        roll_imu_rad  = FusionDegreesToRadians(roll_imu_deg);
-        pitch_imu_rad = FusionDegreesToRadians(pitch_imu_deg);
-        yaw_imu_rad   = FusionDegreesToRadians(yaw_imu_deg);
-
-        saveIMUInOutputFile(roll_imu_deg, pitch_imu_deg, yaw_imu_deg, roll_imu_rad, pitch_imu_rad, yaw_imu_rad);
-
-        if (debug_print_en == 1) {
-            std::cout << "\tINPUT FILE AFTER unit conversion (m -> rad and deg -> rad):" << std::endl;
-            std::cout << " gx = " << gx << " gy = " << gy << " gz = " << gz << std::endl;
+            std::cout << "sample time = " << sample_time << " gx = " << gx << " gy = " << gy << " gz = " << gz << std::endl;
             std::cout << "ax = "<< ax << " ay = " << ay << " az = " << az << std::endl;
             std::cout << "roll_imu_rad = " << roll_imu_rad << " pitch_imu_rad = "<< pitch_imu_rad << " yaw_imu_rad = " << yaw_imu_rad << std::endl;
         }
 
+        /* GYROSCOP{E */
+        // Convert [rad/s] -> [m/s] 
+        gx_m = FusionRadiansToDegrees(gx);
+        gy_m = FusionRadiansToDegrees(gy);
+        gz_m = FusionRadiansToDegrees(gz);
+
+        saveGyroInOutputFile(sample_time, gx_m, gy_m, gz_m, gx, gy, gz);
+
+        /* ACCELEROMETER */
+        // Convert [rad/s^s] -> [m/s^s]
+        ax_m = FusionRadiansToDegrees(ax);
+        ay_m = FusionRadiansToDegrees(ay);
+        az_m = FusionRadiansToDegrees(az);
+    
+        saveAccInOutputFile(ax_m, ay_m, az_m, ax, ay, az);
+
+        /* ROLL-PITCH-YAW CALCULATED BY IMU */
+        // Convert [rad] -> [degrees]
+        roll_imu_deg  = FusionRadiansToDegrees(roll_imu_rad);
+        pitch_imu_deg = FusionRadiansToDegrees(pitch_imu_rad);
+        yaw_imu_deg   = FusionRadiansToDegrees(yaw_imu_rad);
+
+        saveIMUInOutputFile(roll_imu_deg, pitch_imu_deg, yaw_imu_deg, roll_imu_rad, pitch_imu_rad, yaw_imu_rad);
+
+        if (debug_print_en == 1) {
+            std::cout << "\tINPUT FILE AFTER unit conversion (rad -> m and rad -> deg):" << std::endl;
+            std::cout << " gx_m = " << gx_m << " gy_m = " << gy_m << " gz_m = " << gz_m << std::endl;
+            std::cout << "ax_m = "<< ax_m << " ay_m = " << ay_m << " az_m = " << az_m << std::endl;
+            std::cout << "roll_imu_deg = " << roll_imu_deg << " pitch_imu_deg = "<< pitch_imu_deg << " yaw_imu_deg = " << yaw_imu_deg << std::endl;
+        }
+
         /* AHRS FUSION-RELATED FUNCTIONS */
-        // Convert [rad/s] -> [deg/s]
-        fusion_gx  = FusionRadiansToDegrees(gx); // [deg/s]
-        fusion_gy  = FusionRadiansToDegrees(gy); // [deg/s]
-        fusion_gz  = FusionRadiansToDegrees(gz); // [deg/s]
+        fusion_gx  = gx_m; // [m/s]
+        fusion_gy  = gy_m; // [m/s]
+        fusion_gz  = gz_m; // [m/s]
 
 	    // Calibrate gyroscope
         FusionVector3 uncalibratedGyroscope = {
@@ -268,8 +262,8 @@ int main()
         };
         FusionVector3 calibratedGyroscope = FusionCalibrationInertial(uncalibratedGyroscope, FUSION_ROTATION_MATRIX_IDENTITY, gyroscopeSensitivity, FUSION_VECTOR3_ZERO);
 
-        // Convert [rad/s^2] to [deg/s^2] and then to [g]
-        convertAccForFusion(ax, ay, az); // [g]
+        // Convert [m/s^2] to [g-force]
+        convertAccForFusion(ax_m, ay_m, az_m); // [g-force]
 
 	    // Calibrate accelerometer
         FusionVector3 uncalibratedAccelerometer = {
@@ -285,19 +279,23 @@ int main()
         // Update AHRS algorithm
         FusionAhrsUpdateWithoutMagnetometer(&fusionAhrs, calibratedGyroscope, calibratedAccelerometer, sample_freq);
 
+        //TODO: GET QUATERNION
+        // FusionAhrsGetQuaternion
+
         // Roll-Pitch-Yaw calculated by Fusion Algorithm
         FusionEulerAngles eulerAngles = FusionQuaternionToEulerAngles(FusionAhrsGetQuaternion(&fusionAhrs));
 
-        roll_fus_rad  = eulerAngles.angle.roll;  // [rad]
-        pitch_fus_rad = eulerAngles.angle.pitch; // [rad]
-        yaw_fus_rad   = eulerAngles.angle.yaw;   // [rad]
+        // Convert [degrees] -> [rad]
+        roll_fus_rad  = eulerAngles.angle.roll;
+        pitch_fus_rad = eulerAngles.angle.pitch;
+        yaw_fus_rad   = eulerAngles.angle.yaw;
 
         normalizeRollPitchYawFusion(roll_fus_rad, pitch_fus_rad, yaw_fus_rad);
 
         // Convert [rad] -> [degrees]
-        roll_fus_deg  = FusionRadiansToDegrees(roll_fus_rad);  // [degrees]
-        pitch_fus_deg = FusionRadiansToDegrees(pitch_fus_rad); // [degrees]
-        yaw_fus_deg   = FusionRadiansToDegrees(yaw_fus_rad);   // [degrees]
+        roll_fus_deg  = FusionRadiansToDegrees(roll_fus_rad);
+        pitch_fus_deg = FusionRadiansToDegrees(pitch_fus_rad);
+        yaw_fus_deg   = FusionRadiansToDegrees(yaw_fus_rad);
 
         saveRollPitchYawFusionInOutputFile (roll_fus_deg, pitch_fus_deg, yaw_fus_deg, roll_fus_rad, pitch_fus_rad,  yaw_fus_rad);
 

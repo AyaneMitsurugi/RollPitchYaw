@@ -116,9 +116,9 @@ void saveAccInOutputFile(float ax_m, float ay_m, float az_m, float ax, float ay,
 /* Save IMU's Roll-Pitch-Yaw in the output file */
 void saveIMUInOutputFile(float roll_imu_deg, float pitch_imu_deg, float yaw_imu_deg, float roll_imu_rad, float pitch_imu_rad, float yaw_imu_rad);
 
-/* Convert rad/s^2 to g */
+/* Convert m/s^2 to g */
 /* https://stackoverflow.com/questions/6291931/how-to-calculate-g-force-using-x-y-z-values-from-the-accelerometer-in-android/44421684 */
-void convertAccForFusion(float ax, float ay, float az);
+void convertAccForFusion(float ax_m, float ay_m, float az_m);
 
 /* Normalize Roll-Pitch-Yaw calculated by Fusion Algoritm */
 void normalizeRollPitchYawFusion(float roll_rad, float pitch_rad, float yaw_rad);
