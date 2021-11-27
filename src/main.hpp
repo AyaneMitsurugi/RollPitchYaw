@@ -16,29 +16,24 @@
 
 /* EXTERNAL VARIABLES */
 // Gyroscope [rad/s]
-extern float gx;
-extern float gy;
-extern float gz;
+extern float gx_rad;
+extern float gy_rad;
+extern float gz_rad;
 
 // Accelerometer [rad/s^2]
-extern float ax;
-extern float ay;
-extern float az;
+extern float ax_rad;
+extern float ay_rad;
+extern float az_rad;
 
-// Gyroscope [m/s]
-extern float gx_m;
-extern float gy_m;
-extern float gz_m;
+// Gyroscope [deg/s]
+extern float gx_deg;
+extern float gy_deg;
+extern float gz_deg;
 
-// Accelerometer [m/s^2]
-extern float ax_m;
-extern float ay_m;
-extern float az_m;
-
-// Gyroscope for Fusion Algorithm [deg/s]
-extern float fusion_gx;
-extern float fusion_gy;
-extern float fusion_gz;
+// Accelerometer [deg/s^2]
+extern float ax_deg;
+extern float ay_deg;
+extern float az_deg;
 
 // Accelerometer for Fusion Algorithm [g]
 extern float fusion_ax;
@@ -116,12 +111,9 @@ void saveAccInOutputFile(float ax_m, float ay_m, float az_m, float ax, float ay,
 /* Save IMU's Roll-Pitch-Yaw in the output file */
 void saveIMUInOutputFile(float roll_imu_deg, float pitch_imu_deg, float yaw_imu_deg, float roll_imu_rad, float pitch_imu_rad, float yaw_imu_rad);
 
-/* Convert m/s^2 to g */
+/* Convert degrees/s^2 to g */
 /* https://stackoverflow.com/questions/6291931/how-to-calculate-g-force-using-x-y-z-values-from-the-accelerometer-in-android/44421684 */
 void convertAccForFusion(float ax_m, float ay_m, float az_m);
-
-/* Normalize Roll-Pitch-Yaw calculated by Fusion Algoritm */
-void normalizeRollPitchYawFusion(float roll_rad, float pitch_rad, float yaw_rad);
 
 /* Save Roll-Pitch-Yaw calculated by all Fusion Algorithm in the output file */
 void saveRollPitchYawFusionInOutputFile (float roll_fus_deg, float pitch_fus_deg, float yaw_fus_deg, float roll_fus_rad, float pitch_fus_rad, float yaw_fus_rad);
