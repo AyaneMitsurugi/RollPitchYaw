@@ -120,20 +120,17 @@ extern float mah_qw;
 /* FUNCTIONS */
 
 /* Save headers in the output file */
-void saveHeadersInOutputFile(void);
+void saveHeadersInGyroAccFile(void);
 
-/* Save sample_time, gyroscope's raw measurements and converted to rad/s in the output file */
-void saveGyroInOutputFile(float sample_time, float gx_m, float gy_m, float gz_m, float gx, float gy, float gz);
+void saveHeadersInRollPitchYawFile(void);
 
-/* Save acceleromenter's raw measurements and converted to rad/s^2 in the output file */
-void saveAccInOutputFile(float ax_m, float ay_m, float az_m, float ax, float ay, float az);
+void saveHeadersInQuaternionFile(void);
+
+/* Save gyroscope's and accelerometer's data in the output file */
+void saveGyroAccInOutputFile(int sample_idx, float gx_deg, float gy_deg, float gz_deg, float gx_rad, float gy_rad, float gz_rad, float ax_deg, float ay_deg, float az_deg, float ax_rad, float ay_rad, float az_rad);
 
 /* Save IMU's Roll-Pitch-Yaw in the output file */
-void saveIMUInOutputFile(float roll_imu_deg, float pitch_imu_deg, float yaw_imu_deg, float roll_imu_rad, float pitch_imu_rad, float yaw_imu_rad);
-
-/* Convert degrees/s^2 to g */
-/* https://stackoverflow.com/questions/6291931/how-to-calculate-g-force-using-x-y-z-values-from-the-accelerometer-in-android/44421684 */
-void convertAccForFusion(float ax_m, float ay_m, float az_m);
+void saveIMUInOutputFile(int sample_idx, float roll_imu_deg, float pitch_imu_deg, float yaw_imu_deg, float roll_imu_rad, float pitch_imu_rad, float yaw_imu_rad);
 
 /* Save Roll-Pitch-Yaw calculated by all Fusion Algorithm in the output file */
 void saveRollPitchYawFusionInOutputFile (float roll_fus_deg, float pitch_fus_deg, float yaw_fus_deg, float roll_fus_rad, float pitch_fus_rad, float yaw_fus_rad);
@@ -145,4 +142,8 @@ void saveRollPitchYawMadgwickInOutputFile (float roll_mad_deg, float pitch_mad_d
 void saveRollPitchYawMahonyInOutputFile (float roll_mah_deg, float pitch_mah_deg, float yaw_mah_deg, float roll_mah_rad, float pitch_mah_rad, float yaw_mah_rad);
 
 /* Save quaternions for all Algorithms in the output file */
-void saveQuaternionsInOutputFile (float imu_qx, float imu_qy, float imu_qz, float imu_qw, float fus_qx, float fus_qy, float fus_qz, float fus_qw, float mad_qx, float mad_qy, float mad_qz, float mad_qw, float mah_qx, float mah_qy, float mah_qz, float mah_qw);
+void saveQuaternionsInOutputFile(int sample_idx, float imu_qx, float imu_qy, float imu_qz, float imu_qw, float fus_qx, float fus_qy, float fus_qz, float fus_qw, float mad_qx, float mad_qy, float mad_qz, float mad_qw, float mah_qx, float mah_qy, float mah_qz, float mah_qw);
+
+/* Convert deg/s^2 to g */
+/* https://stackoverflow.com/questions/6291931/how-to-calculate-g-force-using-x-y-z-values-from-the-accelerometer-in-android/44421684 */
+void convertAccForFusion(float ax_deg, float ay_deg, float az_deg);
