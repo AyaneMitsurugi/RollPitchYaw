@@ -54,6 +54,11 @@ extern float roll_imu_rad;
 extern float pitch_imu_rad;
 extern float yaw_imu_rad;
 
+extern float imu_qx;
+extern float imu_qy;
+extern float imu_qz;
+extern float imu_qw;
+
 // Common
 extern float debug_print_en;
 extern float precision;
@@ -79,6 +84,11 @@ extern float roll_fus_rad;
 extern float pitch_fus_rad;
 extern float yaw_fus_rad;
 
+extern float fus_qx;
+extern float fus_qy;
+extern float fus_qz;
+extern float fus_qw;
+
 /* AHRS Madgwick-related parameters */
 extern float roll_mad_deg;
 extern float pitch_mad_deg;
@@ -88,6 +98,11 @@ extern float roll_mad_rad;
 extern float pitch_mad_rad;
 extern float yaw_mad_rad;
 
+extern float mad_qx;
+extern float mad_qy;
+extern float mad_qz;
+extern float mad_qw;
+
 /* AHRS Mahony-related functions */
 extern float roll_mah_deg;
 extern float pitch_mah_deg;
@@ -96,6 +111,11 @@ extern float yaw_mah_deg;
 extern float roll_mah_rad;
 extern float pitch_mah_rad;
 extern float yaw_mah_rad;
+
+extern float mah_qx;
+extern float mah_qy;
+extern float mah_qz;
+extern float mah_qw;
 
 /* FUNCTIONS */
 
@@ -123,3 +143,6 @@ void saveRollPitchYawMadgwickInOutputFile (float roll_mad_deg, float pitch_mad_d
 
 /* Save Roll-Pitch-Yaw calculated by Mahony Algorithm in the output file */
 void saveRollPitchYawMahonyInOutputFile (float roll_mah_deg, float pitch_mah_deg, float yaw_mah_deg, float roll_mah_rad, float pitch_mah_rad, float yaw_mah_rad);
+
+/* Save quaternions for all Algorithms in the output file */
+void saveQuaternionsInOutputFile (float imu_qx, float imu_qy, float imu_qz, float imu_qw, float fus_qx, float fus_qy, float fus_qz, float fus_qw, float mad_qx, float mad_qy, float mad_qz, float mad_qw, float mah_qx, float mah_qy, float mah_qz, float mah_qw);

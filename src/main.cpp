@@ -48,6 +48,11 @@ float roll_imu_rad  = 0.0;
 float pitch_imu_rad = 0.0;
 float yaw_imu_rad   = 0.0;
 
+float imu_qx = 0.0;
+float imu_qy = 0.0;
+float imu_qz = 0.0;
+float imu_qw = 0.0;
+
 // Common
 float debug_print_en = 1.0;
 float precision      = 6.0;
@@ -77,6 +82,11 @@ float roll_fus_rad  = 0.0;
 float pitch_fus_rad = 0.0;
 float yaw_fus_rad   = 0.0;
 
+float fus_qx = 0.0;
+float fus_qy = 0.0;
+float fus_qz = 0.0;
+float fus_qw = 0.0;
+
 /* AHRS Madgwick-related variables */
 float roll_mad_deg  = 0.0;
 float pitch_mad_deg = 0.0;
@@ -86,6 +96,11 @@ float roll_mad_rad  = 0.0;
 float pitch_mad_rad = 0.0;
 float yaw_mad_rad   = 0.0;
 
+float mad_qx = 0.0;
+float mad_qy = 0.0;
+float mad_qz = 0.0;
+float mad_qw = 0.0;
+
 /* AHRS Mahony-related variables */
 float roll_mah_deg  = 0.0;
 float pitch_mah_deg = 0.0;
@@ -94,6 +109,11 @@ float yaw_mah_deg   = 0.0;
 float roll_mah_rad  = 0.0;
 float pitch_mah_rad = 0.0;
 float yaw_mah_rad   = 0.0;
+
+float mah_qx = 0.0;
+float mah_qy = 0.0;
+float mah_qz = 0.0;
+float mah_qw = 0.0;
 
 /* FUNCTIONS */
 
@@ -112,7 +132,11 @@ void saveHeadersInOutputFile(void) {
         outfile << "Madgwick Roll [degrees], Madgwick Pitch [degrees],Madgwick Yaw [degrees],";
         outfile << "Madgwick Roll [rad], Madgwick Pitch [rad],Madgwick Yaw [rad],";
         outfile << "Mahony Roll [degrees], Mahony Pitch [degrees],Mahony Yaw [degrees]";
-        outfile << "Mahony Roll [rad], Mahony Pitch [rad],Mahony Yaw [rad]" << std::endl;
+        outfile << "Mahony Roll [rad], Mahony Pitch [rad],Mahony Yaw [rad]";
+        outfile << "IMU q_x, IMU q_y, IMU q_z, IMU q_w";
+        outfile << "Fusion q_x, Fusion q_y, Fusion q_z, Fusion q_w";
+        outfile << "Madgwick q_x, Madgwick q_y, Madgwick q_z, Madgwick q_w";
+        outfile << "Mahony q_x, Mahony q_y, Mahony q_z, Mahony q_w" << std::endl;
     }
 }
 
@@ -172,7 +196,17 @@ void saveRollPitchYawMadgwickInOutputFile (float roll_mad_deg, float pitch_mad_d
 void saveRollPitchYawMahonyInOutputFile (float roll_mah_deg, float pitch_mah_deg, float yaw_mah_deg, float roll_mah_rad, float pitch_mah_rad, float yaw_mah_rad) {
 	if (outfile.is_open()) {
         outfile << std::setprecision(precision) << std::fixed << roll_mah_deg << "," << pitch_mah_deg << "," << yaw_mah_deg << ",";
-        outfile << std::setprecision(precision) << std::fixed << roll_mah_rad << "," << pitch_mah_rad << "," << yaw_mah_rad << std::endl;
+        outfile << std::setprecision(precision) << std::fixed << roll_mah_rad << "," << pitch_mah_rad << "," << yaw_mah_rad << ",";
+    }
+}
+
+/* Save quaternions for all Algorithms in the output file */
+void saveQuaternionsInOutputFile(float imu_qx, float imu_qy, float imu_qz, float imu_qw, float fus_qx, float fus_qy, float fus_qz, float fus_qw, float mad_qx, float mad_qy, float mad_qz, float mad_qw, float mah_qx, float mah_qy, float mah_qz, float mah_qw) {
+	if (outfile.is_open()) {
+        outfile << std::setprecision(precision) << std::fixed << imu_qx << "," << imu_qy << "," << imu_qz << "," << imu_qw;
+        outfile << std::setprecision(precision) << std::fixed << fus_qx << "," << fus_qy << "," << fus_qz << "," << fus_qw;
+        outfile << std::setprecision(precision) << std::fixed << mad_qx << "," << mad_qy << "," << mad_qz << "," << mad_qw;
+        outfile << std::setprecision(precision) << std::fixed << mah_qx << "," << mah_qy << "," << mah_qz << "," << mah_qw << std::endl;
     }
 }
 
@@ -198,13 +232,14 @@ int main()
     std::cout << "Saving output file takes some time. Please be patient..." << std::endl;
 
     /* MAIN LOOP */
-    while (infile >> sample_time >> gx_rad >> gy_rad >> gz_rad >> ax_rad >> ay_rad >> az_rad >> roll_imu_rad >> pitch_imu_rad >> yaw_imu_rad) {
+    while (infile >> sample_time >> gx_rad >> gy_rad >> gz_rad >> ax_rad >> ay_rad >> az_rad >> roll_imu_rad >> pitch_imu_rad >> yaw_imu_rad >> imu_qx >> imu_qy >> imu_qz >> imu_qw) {
         if (debug_print_en == 1) {
             std::cout << "\tINPUT FILE:" << std::endl;
             std::cout << "sample time = " << sample_time << std::endl;
             std::cout << "gx_rad = " << gx_rad << " gy_rad = " << gy_rad << " gz_rad = " << gz_rad << std::endl;
             std::cout << "ax_rad = "<< ax_rad << " ay_rad = " << ay_rad << " az_rad = " << az_rad << std::endl;
             std::cout << "roll_imu_rad = " << roll_imu_rad << " pitch_imu_rad = "<< pitch_imu_rad << " yaw_imu_rad = " << yaw_imu_rad << std::endl;
+            std::cout << "imu_qx = "<< imu_qx << " imu_qy = " << imu_qy << " imu_qz = " << imu_qz << " imu_qw = " << imu_qw << std::endl;
         }
 
         /* GYROSCOP{E */
@@ -265,11 +300,15 @@ int main()
         // Update AHRS algorithm
         FusionAhrsUpdateWithoutMagnetometer(&fusionAhrs, calibratedGyroscope, calibratedAccelerometer, sample_freq);
 
-        //TODO: GET QUATERNION
-        // FusionAhrsGetQuaternion
+        // Quaternions
+        auto FusionQuaternion = FusionAhrsGetQuaternion(&fusionAhrs);
+        fus_qx = fusionAhrs.quaternion.element.x;
+        fus_qy = fusionAhrs.quaternion.element.y;
+        fus_qz = fusionAhrs.quaternion.element.z;
+        fus_qw = fusionAhrs.quaternion.element.w;
 
         // Roll-Pitch-Yaw calculated by Fusion Algorithm
-        FusionEulerAngles eulerAngles = FusionQuaternionToEulerAngles(FusionAhrsGetQuaternion(&fusionAhrs));
+        FusionEulerAngles eulerAngles = FusionQuaternionToEulerAngles(FusionQuaternion);
 
         // Roll-Pitch-Yaw calculated by Fusion Algorithm
         roll_fus_deg  = eulerAngles.angle.roll;
@@ -293,6 +332,12 @@ int main()
         MadgwickGyroscopeAccelerometer(gx_rad, gy_rad, gz_rad, ax_rad, ay_rad, az_rad);
         computeAngles();
 
+        // Quaternions
+        mad_qx = q1;
+        mad_qy = q2;
+        mad_qz = q3;
+        mad_qw = q0;
+
         // Roll-Pitch-Yaw calculated by Madgwick Algorithm
         roll_mad_rad  = roll;
 	    pitch_mad_rad = pitch;
@@ -315,6 +360,12 @@ int main()
         MahonyGyroscopeAccelerometer(gx_rad, gy_rad, gz_rad, ax_rad, ay_rad, az_rad);
         computeAngles();
 
+        // Quaternions
+        mah_qx = q1;
+        mah_qy = q2;
+        mah_qz = q3;
+        mah_qw = q0;
+
         // Roll-Pitch-Yaw calculated by Mahony Algorithm
         roll_mah_rad  = roll;
 	    pitch_mah_rad = pitch;
@@ -327,10 +378,17 @@ int main()
 
         saveRollPitchYawMahonyInOutputFile(roll_mah_deg, pitch_mah_deg, yaw_mah_deg, roll_mah_rad, pitch_mah_rad, yaw_mah_rad);
 
+        saveQuaternionsInOutputFile(imu_qx, imu_qy, imu_qz, imu_qw, fus_qx, fus_qy, fus_qz, fus_qw, mad_qx, mad_qy, mad_qz, mad_qw, mah_qx, mah_qy, mah_qz, mah_qw);
+
         if (debug_print_en == 1) {
             std::cout << "\tMahony Algorithm:" << std::endl;
             std::cout << "roll_mah_deg = " << roll_mah_deg << " pitch_mah_deg = " << pitch_mah_deg << " yaw_mah_deg = " << yaw_mah_deg << std::endl;
             std::cout << "roll_mah_rad = " << roll_mah_rad << " pitch_mah_rad = " << pitch_mah_rad << " yaw_mah_rad = " << yaw_mah_rad << std::endl;
+            std::cout << "\tQuaternions:" << std::endl;
+            std::cout << "imu_qx = " << imu_qx << " imu_qy = " << imu_qy << " imu_qz = " << imu_qz << " imu_qw = " << imu_qw << std::endl;
+            std::cout << "fus_qx = " << fus_qx << " fus_qy = " << fus_qy << " fus_qz = " << fus_qz << " fus_qw = " << fus_qw << std::endl;
+            std::cout << "mad_qx = " << mad_qx << " mad_qy = " << mad_qy << " mad_qz = " << mad_qz << " mad_qw = " << mad_qw << std::endl;
+            std::cout << "mah_qx = " << mah_qx << " mah_qy = " << mah_qy << " mah_qz = " << mah_qz << " mah_qw = " << mah_qw << std::endl;
         }
     } // END OF: while (true)
     std::cout << "Saving output file is COMPLETE!" << std::endl;
